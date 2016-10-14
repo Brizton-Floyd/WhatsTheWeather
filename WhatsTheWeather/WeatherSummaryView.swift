@@ -134,7 +134,7 @@ class WeatherSummaryView : UIView {
         addContraints(formatString: "V:|[v0]|", view: cellBackgroundImage)
 
         addConstraint(NSLayoutConstraint(item: weatherImage, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
-        addConstraint(NSLayoutConstraint(item: weatherImage, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: -70))
+        addConstraint(NSLayoutConstraint(item: weatherImage, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: -60))
         
         addContraints(formatString: "H:[v0(100)]", view: weatherImage)
         addContraints(formatString: "V:[v0(100)]", view: weatherImage)
@@ -144,7 +144,7 @@ class WeatherSummaryView : UIView {
     
         addContraints(formatString: "V:[v0]-75-[v1(40)]", view:locationLabel, percipChanceLabel)
 
-        addContraints(formatString: "H:|-8-[v0]-6-[v1]-30-[v2]-30-[v3(20)]-3-[v4]-8-|", view:percipImage,percipChanceLabel, weatherImage, windImage,windSpeedLabel)
+        addContraints(formatString: "H:|-15-[v0]-6-[v1]-30-[v2]-30-[v3(20)]-3-[v4]-8-|", view:percipImage,percipChanceLabel, weatherImage, windImage,windSpeedLabel)
         
         addContraints(formatString: "V:[v0]-83-[v1(20)]", view: locationLabel, windImage)
  
