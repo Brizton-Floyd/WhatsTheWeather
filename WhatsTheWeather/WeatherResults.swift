@@ -7,8 +7,38 @@
 //
 
 import Foundation
+import UIKit
 
-
-class WeatherResults {
+class WeatherResults : NSObject{
     
+    var currentWeather: CurrentWeather?
+    var forecast: [Forecast]?
+    
+    static func fetchWeatherData(completionHandler:@escaping (WeatherResults)->()) {
+        
+        let url = URL(string: WEATHER_URL)
+        URLSession.shared.dataTask(with: url!) { (data, response, error) in
+            
+            if error != nil {
+                print(error)
+                return
+            }
+            
+            do{
+                
+                let json = try(JSONSerialization.jsonObject(with: data!, options: .mutableContainers))
+                
+                var weatherResult = WeatherResults()
+                
+                DispatchQueue.main.async(execute: { 
+                    completionHandler(weatherResult)
+                })
+    
+                
+            }catch let err {
+                print(err)
+            }
+            
+        }.resume()
+    }
 }

@@ -12,6 +12,7 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
 
     
     private let forecastCell = "forecastCell"
+    private var weatherData: WeatherResults?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,8 +33,13 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
         
         collectionView?.contentInset = UIEdgeInsets(top: view.frame.height / 1.96, left: 0, bottom: 0, right: 0)
         collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: view.frame.height / 1.96, left: 0, bottom: 0, right: 0)
-        
-        setUpWeatherSummaryView()
+     
+        LocationProvider.getLocation()
+        WeatherResults.fetchWeatherData { (weatherResults) in
+            self.weatherData = weatherResults
+            self.setUpWeatherSummaryView()
+            self.collectionView?.reloadData()
+        }
     }
     
     let weatherSummary: WeatherSummaryView = {
@@ -43,6 +49,7 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
     }()
     
     func setUpWeatherSummaryView() {
+        
         view.addSubview(weatherSummary)
         
         view.addContraints(formatString: "H:|[v0]|", view: weatherSummary)
@@ -50,7 +57,10 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
     }
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        return 10
+        if let count = weatherData?.forecast?.count {
+            return count
+        }
+        return 0
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {

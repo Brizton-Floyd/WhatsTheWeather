@@ -8,6 +8,6 @@
 
 import Foundation
 
-class CurrentWeather {
+class CurrentWeather: NSObject {
     
 }
