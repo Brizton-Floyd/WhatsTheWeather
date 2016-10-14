@@ -13,6 +13,7 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
     
     private let forecastCell = "forecastCell"
     private var weatherData: WeatherResults?
+    private var location: LocationProvider?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,15 +32,29 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
         navigationController?.navigationBar.isTranslucent = false
         
         
-        collectionView?.contentInset = UIEdgeInsets(top: view.frame.height / 1.96, left: 0, bottom: 0, right: 0)
-        collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: view.frame.height / 1.96, left: 0, bottom: 0, right: 0)
+        collectionView?.contentInset = UIEdgeInsets(top: view.frame.height / 2.17, left: 0, bottom: 0, right: 0)
+        collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: view.frame.height / 2.17, left: 0, bottom: 0, right: 0)
      
-        LocationProvider.getLocation()
-        WeatherResults.fetchWeatherData { (weatherResults) in
-            self.weatherData = weatherResults
+        // Get the location
+        location = LocationProvider()
+        location?.getLocation()
+        
+        // Merge back onto main thread after location is retrieved
+        DispatchQueue.main.async {
+            
+            if let lattitude = LocationCoordinates.sharedInstance.lattitude, let longitude = LocationCoordinates.sharedInstance.longitude {
+
+                LocationCoordinates.sharedInstance.lattitude = lattitude
+                LocationCoordinates.sharedInstance.longitude = longitude
+                
+                // Fetch Weather Data
+                WeatherResults.fetchWeatherData { (weatherResults) in
+                    self.weatherData = weatherResults
+                    self.collectionView?.reloadData()
+                }
+            }
             self.setUpWeatherSummaryView()
-            self.collectionView?.reloadData()
-        }
+       }
     }
     
     let weatherSummary: WeatherSummaryView = {
@@ -60,7 +75,7 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
         if let count = weatherData?.forecast?.count {
             return count
         }
-        return 0
+        return 10
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
