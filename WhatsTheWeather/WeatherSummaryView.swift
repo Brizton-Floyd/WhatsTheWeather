@@ -128,7 +128,7 @@ class WeatherSummaryView : UIView {
         addSubview(windSpeedLabel)
         addSubview(mainTempLabel)
         
-        addContraints(formatString: "H:|-25-[v0]-25-|", view: locationLabel)
+        addContraints(formatString: "H:|-8-[v0]-8-|", view: locationLabel)
         
         addContraints(formatString: "H:|[v0]|", view: cellBackgroundImage)
         addContraints(formatString: "V:|[v0]|", view: cellBackgroundImage)
