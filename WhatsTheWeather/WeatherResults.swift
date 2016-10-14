@@ -17,6 +17,7 @@ class WeatherResults : NSObject{
     static func fetchWeatherData(completionHandler:@escaping (WeatherResults)->()) {
         
         let url = URL(string: WEATHER_URL)
+        print(url)
         URLSession.shared.dataTask(with: url!) { (data, response, error) in
             
             if error != nil {
@@ -29,7 +30,7 @@ class WeatherResults : NSObject{
                 let json = try(JSONSerialization.jsonObject(with: data!, options: .mutableContainers))
                 
                 var weatherResult = WeatherResults()
-                
+                print(json)
                 DispatchQueue.main.async(execute: { 
                     completionHandler(weatherResult)
                 })

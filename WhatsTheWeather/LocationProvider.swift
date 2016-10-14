@@ -12,7 +12,7 @@ import CoreLocation
 
 class LocationProvider:NSObject, CLLocationManagerDelegate {
     
-    private override init(){
+    override init(){
             super.init()
         
         locationManager = CLLocationManager()
@@ -23,17 +23,15 @@ class LocationProvider:NSObject, CLLocationManagerDelegate {
     }
     
     var locationManager: CLLocationManager!
-    static var location: LocationProvider?
+    var location: LocationProvider?
     
-    static func getLocation(){
+    func getLocation(){
         
-        location = LocationProvider()
-        
-        if (location?.locationManager.responds(to: #selector(CLLocationManager.requestWhenInUseAuthorization)))! {
-            location?.locationManager.requestWhenInUseAuthorization()
+        if (locationManager.responds(to: #selector(CLLocationManager.requestWhenInUseAuthorization))) {
+            locationManager.requestWhenInUseAuthorization()
         }else{
             
-            location?.locationManager.startUpdatingLocation()
+            locationManager.startUpdatingLocation()
         }
     }
     
