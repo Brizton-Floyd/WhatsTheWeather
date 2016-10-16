@@ -10,15 +10,46 @@ import UIKit
 
 class WeatherSummaryView : UIView {
     
-    lazy var collectionView: UICollectionView = {
+    var summaryData: CurrentWeather? {
         
-        let layout = UICollectionViewFlowLayout()
-        
-        let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        //view.backgroundColor = UIColor.red
+        didSet {
+            
+            fetchWeatherImage()
+            if let city = summaryData?.city, let state = summaryData?.state {
+                
+                let text = "\(city), \(state)"
+                locationLabel.text = text
+            }
+            
+            if let windspeed = summaryData?.windSpeed {
+                
+                windSpeedLabel.text = "\(windspeed)mph"
+            }
+            if let temp = summaryData?.temperature {
+                let roundedTemp = Int(temp)
+                mainTempLabel.text = "\(roundedTemp)°F"
+            }
+            if let precip = summaryData?.liquidPercip {
+                percipChanceLabel.text = "\(precip)"
+            }
+            if let day = summaryData?.day, let weekday = summaryData?.weekday, let month = summaryData?.month {
+                
+                dateLabel.text = "\(weekday), \(month) \(day)"
+            }
+            
+            if let summary = summaryData?.weatherSummary {
+                weatherQuickTip.text = summary
+            }
+        }
+    }
 
-        return view
-    }()
+    func fetchWeatherImage() {
+        
+        if let iconUrl = summaryData?.iconImage {
+            
+            weatherImage.image = UIImage(named: iconUrl)
+        }
+    }
     
     let cellBackgroundImage: UIImageView = {
         let cellImage = UIImageView()
@@ -32,7 +63,7 @@ class WeatherSummaryView : UIView {
     let locationLabel: UILabel = {
        
         let label = UILabel()
-        label.text = "San Francisco"
+        label.text = "--"
         label.textColor = UIColor.white
         label.font = UIFont.systemFont(ofSize: 22)
         label.textAlignment = .center
@@ -40,13 +71,26 @@ class WeatherSummaryView : UIView {
         return label
     }()
     
+    let weatherQuickTip: UILabel = {
+        
+        let label = UILabel()
+        //label.backgroundColor = UIColor.black
+        label.text = "--"
+        label.textColor = UIColor.setTransParency(redColor: 235, green: 235, blue: 235)
+        label.textAlignment = .left
+        label.numberOfLines = 7
+        label.font = UIFont.systemFont(ofSize: 14)
+
+        return label
+    }()
+    
     let mainTempLabel: UILabel = {
         
         let label = UILabel()
-        label.text = "85°F"
+        label.text = "--"
         label.textColor = UIColor.white
-       // label.backgroundColor = UIColor.purple
-        label.font = UIFont.systemFont(ofSize: 140)
+        //label.backgroundColor = UIColor.purple
+        label.font = UIFont.systemFont(ofSize: 50)
         label.textAlignment = .center
         
         return label
@@ -55,19 +99,7 @@ class WeatherSummaryView : UIView {
     let percipChanceLabel: UILabel = {
         
         let label = UILabel()
-        label.text = "50%"
-        label.textColor = UIColor.white
-       // label.backgroundColor = UIColor.white
-        label.font = UIFont.systemFont(ofSize: 18)
-        label.textAlignment = .center
-        
-        return label
-    }()
-    
-    let windSpeedLabel: UILabel = {
-        
-        let label = UILabel()
-        label.text = "6mph"
+        label.text = "--"
         label.textColor = UIColor.white
         //label.backgroundColor = UIColor.white
         label.font = UIFont.systemFont(ofSize: 18)
@@ -76,10 +108,35 @@ class WeatherSummaryView : UIView {
         return label
     }()
     
+    let dateLabel: UILabel = {
+        
+        let label = UILabel()
+        label.text = "--"
+        label.textColor = UIColor.white
+        //label.backgroundColor = UIColor.white
+        label.font = UIFont.boldSystemFont(ofSize: 14)
+        label.textAlignment = .center
+        
+        return label
+    }()
+    
+    let windSpeedLabel: UILabel = {
+        
+        let label = UILabel()
+        label.text = "--"
+        label.textColor = UIColor.white
+        //label.backgroundColor = UIColor.white
+        label.font = UIFont.boldSystemFont(ofSize: 14
+        )
+        label.textAlignment = .center
+        
+        return label
+    }()
+    
     let percipImage: UIImageView = {
         let weatherImage = UIImageView()
         //weatherImage.backgroundColor = UIColor.green
-        weatherImage.image = UIImage(named: "Raindrop")
+        weatherImage.image = UIImage(named: "percipImage")
         weatherImage.contentMode = .scaleAspectFit
         weatherImage.clipsToBounds = true
         return weatherImage
@@ -97,10 +154,24 @@ class WeatherSummaryView : UIView {
     let weatherImage: UIImageView = {
         let weatherImage = UIImageView()
         //weatherImage.backgroundColor = UIColor.green
-        weatherImage.image = UIImage(named: "Clear")
-        weatherImage.contentMode = .scaleAspectFill
+        weatherImage.image = UIImage(named: "")
+        weatherImage.contentMode = .scaleAspectFit
         weatherImage.clipsToBounds = true
         return weatherImage
+    }()
+    
+    let divider: UIView = {
+        
+        let view = UIView()
+        view.backgroundColor = UIColor.setTransParency(redColor: 220, green: 220, blue: 220)
+        return view
+    }()
+    
+    let dateAndCityDivider: UIView = {
+        
+        let view = UIView()
+        view.backgroundColor = UIColor.white//UIColor.setTransParency(redColor: 220, green: 220, blue: 220)
+        return view
     }()
     
     override init(frame:
@@ -120,38 +191,66 @@ class WeatherSummaryView : UIView {
 
         addSubview(cellBackgroundImage)
         addSubview(locationLabel)
-        
+        addSubview(dateAndCityDivider)
         addSubview(percipImage)
         addSubview(percipChanceLabel)
         addSubview(weatherImage)
         addSubview(windImage)
         addSubview(windSpeedLabel)
         addSubview(mainTempLabel)
+        addSubview(divider)
+        addSubview(dateLabel)
+        addSubview(weatherQuickTip)
+        
+        addConstraint(NSLayoutConstraint(item: divider, attribute: .top, relatedBy: .equal, toItem: mainTempLabel, attribute: .bottom, multiplier: 1, constant: 8))
+        addConstraint(NSLayoutConstraint(item: divider, attribute: .height, relatedBy: .equal, toItem: self, attribute: .height, multiplier: 0, constant: 1))
+        
+        addConstraint(NSLayoutConstraint(item: dateAndCityDivider, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
+        addConstraint(NSLayoutConstraint(item: dateAndCityDivider, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: -80))
+        
+        addConstraint(NSLayoutConstraint(item: dateLabel, attribute: .left, relatedBy: .equal, toItem: dateAndCityDivider, attribute: .right, multiplier: 1, constant: -3))
+        addConstraint(NSLayoutConstraint(item: dateLabel, attribute: .bottom, relatedBy: .equal, toItem: weatherImage, attribute: .top, multiplier: 1, constant: -10))
+        addConstraint(NSLayoutConstraint(item: dateLabel, attribute: .right, relatedBy: .equal, toItem: windSpeedLabel, attribute: .right, multiplier: 1, constant: 0))
+        
+        addConstraint(NSLayoutConstraint(item: weatherQuickTip, attribute: .top, relatedBy: .equal, toItem: weatherImage, attribute: .bottom, multiplier: 1, constant: 30))
+        
+        addConstraint(NSLayoutConstraint(item: weatherImage, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
+        addConstraint(NSLayoutConstraint(item: weatherImage, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: -10))
+        
+        addConstraint(NSLayoutConstraint(item: mainTempLabel, attribute: .bottom, relatedBy: .equal, toItem: weatherImage, attribute: .top, multiplier: 1, constant: 5))
+        
+        addContraints(formatString: "H:|-8-[v0]-8-|", view: weatherQuickTip)
+ 
+        addContraints(formatString:"H:|[v0]|", view: divider)
+        addContraints(formatString:"V:[v0]-1-|", view:divider)
+        
+        addContraints(formatString: "H:[v0]", view: dateLabel)
+        addContraints(formatString: "V:[v0(20)]", view: dateLabel)
+        
+        addContraints(formatString: "H:[v0(1)]", view: dateAndCityDivider)
+        addContraints(formatString: "V:[v0(30)]", view: dateAndCityDivider)
         
         addContraints(formatString: "H:|-8-[v0]-8-|", view: locationLabel)
         
         addContraints(formatString: "H:|[v0]|", view: cellBackgroundImage)
         addContraints(formatString: "V:|[v0]|", view: cellBackgroundImage)
-
-        addConstraint(NSLayoutConstraint(item: weatherImage, attribute: .centerX, relatedBy: .equal, toItem: self, attribute: .centerX, multiplier: 1, constant: 0))
-        addConstraint(NSLayoutConstraint(item: weatherImage, attribute: .centerY, relatedBy: .equal, toItem: self, attribute: .centerY, multiplier: 1, constant: -60))
         
         addContraints(formatString: "H:[v0(100)]", view: weatherImage)
         addContraints(formatString: "V:[v0(100)]", view: weatherImage)
         
-        addContraints(formatString: "V:|-8-[v0(30)]-80-[v1(20)]", view: locationLabel, percipImage)
+        addContraints(formatString: "V:|-8-[v0(30)]-120-[v1(20)]", view: locationLabel, percipImage)
         addContraints(formatString: "H:|-25-[v0(20)]", view: percipImage)
     
-        addContraints(formatString: "V:[v0]-75-[v1(40)]", view:locationLabel, percipChanceLabel)
+        addContraints(formatString: "V:[v0]-110-[v1(40)]", view:locationLabel, percipChanceLabel)
 
         addContraints(formatString: "H:|-15-[v0]-6-[v1]-30-[v2]-30-[v3(20)]-3-[v4]-8-|", view:percipImage,percipChanceLabel, weatherImage, windImage,windSpeedLabel)
         
-        addContraints(formatString: "V:[v0]-83-[v1(20)]", view: locationLabel, windImage)
+        addContraints(formatString: "V:[v0]-120-[v1(20)]", view: locationLabel, windImage)
  
-        addContraints(formatString: "V:[v0]-75-[v1(40)]", view:locationLabel,windSpeedLabel)
+        addContraints(formatString: "V:[v0]-110-[v1(40)]", view:locationLabel,windSpeedLabel)
         
-        addContraints(formatString: "H:|[v0]|", view: mainTempLabel)
-        addContraints(formatString: "V:[v0]-6-[v1]|", view:weatherImage, mainTempLabel)
+        addContraints(formatString: "H:|-8-[v0]", view: mainTempLabel)
+
 
     }
     

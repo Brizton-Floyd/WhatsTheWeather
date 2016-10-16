@@ -10,15 +10,15 @@ import UIKit
 
 class WeatherViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
 
-    
     private let forecastCell = "forecastCell"
     private var weatherData: WeatherResults?
-    private var location: LocationProvider?
+    var location: LocationProvider!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-       // navigationItem.title = "Whats The Weather"
+        
+        location = LocationProvider()
+        
         
         // set the text on the navigation controller
         let title = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width / 3, height: view.frame.height))
@@ -31,30 +31,56 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
         collectionView?.register(ForecastCell.self, forCellWithReuseIdentifier: forecastCell)
         navigationController?.navigationBar.isTranslucent = false
         
-        
-        collectionView?.contentInset = UIEdgeInsets(top: view.frame.height / 2.17, left: 0, bottom: 0, right: 0)
+        collectionView?.contentInset = UIEdgeInsets(top: view.frame.height / 2.17, left: 0, bottom: 12.3, right: 0)
         collectionView?.scrollIndicatorInsets = UIEdgeInsets(top: view.frame.height / 2.17, left: 0, bottom: 0, right: 0)
-     
-        // Get the location
-        location = LocationProvider()
-        location?.getLocation()
         
-        // Merge back onto main thread after location is retrieved
-        DispatchQueue.main.async {
+        
+        setUpNavBarButtons()
+        location.getLocation()
+        
+        // Fetch Weather Data
+        WeatherResults.fetchWeatherData { (weatherResults) in
             
-            if let lattitude = LocationCoordinates.sharedInstance.lattitude, let longitude = LocationCoordinates.sharedInstance.longitude {
-
-                LocationCoordinates.sharedInstance.lattitude = lattitude
-                LocationCoordinates.sharedInstance.longitude = longitude
-                
-                // Fetch Weather Data
-                WeatherResults.fetchWeatherData { (weatherResults) in
-                    self.weatherData = weatherResults
-                    self.collectionView?.reloadData()
-                }
-            }
+            self.weatherData = weatherResults
+            self.weatherData?.forecast?.remove(at: 0)
+            self.weatherSummary.summaryData = self.weatherData?.currentWeather
             self.setUpWeatherSummaryView()
-       }
+            self.collectionView?.reloadData()
+        }
+        //DispatchQueue.main.async {
+            
+   
+        //}
+        //getLocationAndWeather()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+
+    }
+    func setUpNavBarButtons() {
+        let refreshImage = UIImage(named: "refresh")?.withRenderingMode(.alwaysOriginal)
+        let refreshImageItem = UIBarButtonItem(image: refreshImage, style: .plain, target: self, action: #selector(reloadData))
+        
+        navigationItem.rightBarButtonItems = [refreshImageItem]
+    }
+    
+    func reloadData() {
+        
+        getLocationAndWeather()
+    }
+    
+    func getLocationAndWeather() {
+
+        location.getLocation()
+        // Fetch Weather Data
+        WeatherResults.fetchWeatherData { (weatherResults) in
+            
+            self.weatherData = weatherResults
+            self.weatherData?.forecast?.remove(at: 0)
+            self.weatherSummary.summaryData = self.weatherData?.currentWeather
+            self.collectionView?.reloadData()
+        }
+
     }
     
     let weatherSummary: WeatherSummaryView = {
@@ -66,6 +92,7 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
     func setUpWeatherSummaryView() {
         
         view.addSubview(weatherSummary)
+    
         
         view.addContraints(formatString: "H:|[v0]|", view: weatherSummary)
         view.addContraints(formatString: "V:|[v0(\((view.frame.height / 2) + 6))]|", view: weatherSummary)
@@ -75,12 +102,14 @@ class WeatherViewController: UICollectionViewController, UICollectionViewDelegat
         if let count = weatherData?.forecast?.count {
             return count
         }
-        return 10
+        return 0
     }
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: forecastCell, for: indexPath) as! ForecastCell
+        
+        cell.forecastDetails = weatherData?.forecast?[indexPath.item]
     
         return cell
     }

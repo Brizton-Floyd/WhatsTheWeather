@@ -10,4 +10,9 @@ import Foundation
 
 class Forecast : NSObject{
     
+    var dayOfWeek: String?
+    var highTemp: NSNumber?
+    var imageIcon: String?
+    var condition: String?
+    var lowTemp: NSNumber?
 }

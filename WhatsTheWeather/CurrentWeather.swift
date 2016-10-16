@@ -10,10 +10,14 @@ import Foundation
 
 class CurrentWeather: NSObject {
     
-    var city: NSString?
-    var state: NSString?
-    var iconImage: NSString?
+    var city: String?
+    var state: String?
+    var iconImage: String?
     var liquidPercip: NSNumber?
     var windSpeed: NSNumber?
-    var temperature: NSString?
+    var temperature: NSNumber?
+    var day: NSNumber?
+    var month:String?
+    var weekday:String?
+    var weatherSummary: String?
 }

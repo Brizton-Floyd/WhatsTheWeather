@@ -20,11 +20,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
         window?.rootViewController = UINavigationController(rootViewController: WeatherViewController(collectionViewLayout: UICollectionViewFlowLayout()))
-        UINavigationBar.appearance().barTintColor = UIColor.blue
+        UINavigationBar.appearance().barTintColor = UIColor.setTransParency(redColor: 100, green: 149, blue: 237)
         application.statusBarStyle = .lightContent
         
         let statusBarBackgroundView = UIView()
-        statusBarBackgroundView.backgroundColor = UIColor.blue
+        statusBarBackgroundView.backgroundColor = UIColor.setTransParency(redColor: 65, green: 105, blue: 225)
         window?.addSubview(statusBarBackgroundView)
         window?.addContraints(formatString:"H:|[v0]|", view: statusBarBackgroundView)
         window?.addContraints(formatString: "V:|[v0(20)]", view: statusBarBackgroundView)

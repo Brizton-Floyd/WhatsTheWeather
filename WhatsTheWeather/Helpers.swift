@@ -22,3 +22,37 @@ extension UIView {
         addConstraints(NSLayoutConstraint.constraints(withVisualFormat: formatString, options: NSLayoutFormatOptions(), metrics: nil, views: viewDictinary))
     }
 }
+
+extension UIImageView {
+    
+    func getRequestedImage(image: String) {
+
+        let url = URL(string: image)
+        
+        
+        URLSession.shared.dataTask(with: url!, completionHandler: { (data, response, error) in
+            
+            if error != nil {
+                print(error)
+                return
+            }
+            
+            DispatchQueue.main.async(execute: { 
+                
+                self.image = UIImage(data: data!)
+            })
+            
+            
+        }).resume()
+    }
+}
+
+
+
+extension UIColor {
+    
+    static func setTransParency(redColor: Float, green: Float, blue:Float) -> UIColor {
+        
+        return UIColor(colorLiteralRed: redColor / 255, green: green/255, blue: blue/255, alpha: 1)
+    }
+}

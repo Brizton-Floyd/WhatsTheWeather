@@ -14,48 +14,29 @@ class LocationProvider:NSObject, CLLocationManagerDelegate {
     
     override init(){
             super.init()
-        
-        locationManager = CLLocationManager()
         locationManager.delegate = self
-        locationManager.requestAlwaysAuthorization()
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
+        locationManager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
     }
     
-    var locationManager: CLLocationManager!
-    var location: LocationProvider?
+    var  locationManager = CLLocationManager()
+    static var location = LocationProvider()
+    private var currentLocation: CLLocation!
     
     func getLocation(){
         
-        if (locationManager.responds(to: #selector(CLLocationManager.requestWhenInUseAuthorization))) {
+        currentLocation = locationManager.location
+        
+        if CLLocationManager.authorizationStatus() == .authorizedWhenInUse {
+            
+            LocationCoordinates.sharedInstance.lattitude = currentLocation.coordinate.latitude as NSNumber?
+            LocationCoordinates.sharedInstance.longitude = currentLocation.coordinate.longitude as NSNumber?
+            
+        }
+        else{
             locationManager.requestWhenInUseAuthorization()
-        }else{
-            
-            locationManager.startUpdatingLocation()
+            getLocation()
         }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        
-        print("Error to update location", error)
-    }
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        
-        switch status {
-        case .notDetermined:break
-        case .restricted:break
-        case .denied:print("Do some error handling")
-        break
-        default:
-            
-            locationManager.startUpdatingLocation()
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        
-        let yourLastLocation = locations.last! as CLLocation
-        LocationCoordinates.sharedInstance.lattitude = yourLastLocation.coordinate.latitude as NSNumber
-        LocationCoordinates.sharedInstance.longitude = yourLastLocation.coordinate.longitude as NSNumber
     }
 }
